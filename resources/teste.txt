@@ -1,0 +1,5 @@
+pergunta ; resposta 1 ; resposta 2 ; resposta 3 ; resposta 4 ; c
+pergunta 1 ; resposta 1 ; resposta 2 ; resposta 3 ; resposta 4 ; b
+pergunta 2 ; resposta 1 ; resposta 2 ; resposta 3 ; resposta 4 ; c
+pergunta 3 ; resposta 1 ; resposta 2 ; resposta 3 ; resposta 4 ; d
+pergunta 4 ; resposta 1 ; resposta 2 ; resposta 3 ; resposta 4 ; b
