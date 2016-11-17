@@ -1,7 +1,11 @@
 # ignore all .idea folders
 *.idea
 
+<<<<<<< HEAD
 /target/
+=======
+
+>>>>>>> ea73ba88a323fc938939952b3ab15866dd8f6c63
 
 # Created by https://www.gitignore.io/api/macos,intellij,windows
 
@@ -108,3 +112,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+<<<<<<< HEAD
+=======
+
+>>>>>>> ea73ba88a323fc938939952b3ab15866dd8f6c63
