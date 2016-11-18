@@ -16,6 +16,12 @@ public class QuestionHandler {
 
     private LinkedList questions;
 
+
+    /**
+     * Loads Questions
+     * If the questions are null, the file manager will select a theme. If not, it will return a question.
+     * todo
+     */
     public void loadQuestions() {
 
         try {
@@ -26,6 +32,11 @@ public class QuestionHandler {
         }
     }
 
+    /**
+     * Picks a question
+     todo If the question block is not empty, it will remove SOMETHING. OTHERWISE, SOMETHING ELSE WILL HAPPEN.
+     * @return The question part of the question block.
+     */
     public String[] pickQuestion() {
 
         String questionBlock;

@@ -6,10 +6,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Hashtable;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,9 +19,11 @@ public class Server {
 
     private Socket clientSocket;
     private int portNumber;
-    private Hashtable<InetAddress, Player> playersList;
+    private Vector<ServerConnection> playersList;
     private int maxNrOfPlayers;
-    private ExecutorService poolRejectPlayers = Executors.newFixedThreadPool(2);
+<<<<<<< HEAD
+    private String[] playersNr;
+    private ExecutorService poolRejectPlayers;// = Executors.newFixedThreadPool(2);
 
     /**
      * Server constructor.
@@ -31,11 +32,17 @@ public class Server {
      * Calls a method to fill the list.
      * Starts the server.
      */
+=======
+    private ExecutorService poolRejectPlayers = Executors.newFixedThreadPool(2);
+
+
+>>>>>>> 70e618875dbd0ae55b7a72010384993c0cce4bc5
     public Server() {
 
         setPortNumber();
         maxNrOfPlayers = FinalVars.MAX_NR_PLAYERS;
-        playersList = new Hashtable<>();
+        playersList = new Vector<>();
+        createPlayersNr();
         startServer();
     }
 
@@ -51,7 +58,8 @@ public class Server {
 
         this.maxNrOfPlayers = maxNrOfPlayers;
         this.portNumber = portNumber;
-        playersList = new Hashtable<>();
+        playersList = new Vector<>();
+        createPlayersNr();
         startServer();
     }
 
@@ -82,10 +90,10 @@ public class Server {
      */
     private void startServer() {
 
-        Player player;
+        ServerConnection sC;
         ExecutorService pool = Executors.newFixedThreadPool(maxNrOfPlayers);
 
-        System.out.println("Server listening on port " + portNumber + "\nWaiting for players...");
+        System.out.println("Server listening on port " + portNumber + "\nover...");
 
         broadcast("Waiting for more playersList on port..." + portNumber);
 
@@ -96,11 +104,11 @@ public class Server {
 
                 clientSocket = serverSocket.accept();
 
-                if (playersList.size() < maxNrOfPlayers && !playersList.containsKey(clientSocket.getInetAddress())) { // TODO: 18/11/16 build 2 server jars - LAN and WAN
-                    player = new Player(clientSocket, this);
-                    playersList.put(clientSocket.getInetAddress(), player);
+                if (playersList.size() < maxNrOfPlayers) {
+                    sC = new ServerConnection(clientSocket, this);
+                    playersList.addElement(sC);
                     System.out.println(clientSocket + " connected!\nTotal: " + playersList.size());
-                    pool.submit(player);
+                    pool.submit(sC);
                     continue;
                 }
                 rejectClient(clientSocket);
@@ -153,13 +161,11 @@ public class Server {
      */
     public void broadcast(String message) {
 
-        for (Player client : playersList.values()) {
+        for (ServerConnection client : playersList) {
             client.sendMessage(message + "\n");
         }
     }
 
-/*
-    public void stopConnection(String playerName) {
     /**
      * Stops the connection.
      * @param client is a server connection.
@@ -167,17 +173,27 @@ public class Server {
      * If the list of players is not empty it will broadcast a message with the name of the player when he quits, removing him from the list.
      * Otherwise it will print out then names of players still in the game.
      */
-/*    public void stopConnection(Player client, String playerName) {
+    public void stopConnection(ServerConnection client, String playerName) {
 
         if (!playersList.isEmpty()) {
             broadcast("\n" + (char) 27 + "[30;41;1m[" + playerName + "] as quit!" + (char) 27 + "[0m");
         }
-        ;
-        System.out.println(playersList.remove(clientSocket.getInetAddress()) + "loose connection.\nRemaining players: " + playersList.size());
+        playersList.removeElement(client);
+        System.out.println("Remaining playersList: " + playersList.size());
     }
-*/
 
+<<<<<<< HEAD
+    /**
+     * Sets the player number for each player that successfully connects to the server.
+     */
+    private void createPlayersNr() {
+        playersNr = new String[maxNrOfPlayers];
+        for (int i = 0; i < maxNrOfPlayers; i++) {
+            playersNr[i] = "[Player " + (i + 1) + "] ";
+        }
+=======
     public int getNrOfMissingPlayers() {
         return maxNrOfPlayers - playersList.size();
+>>>>>>> 70e618875dbd0ae55b7a72010384993c0cce4bc5
     }
 }
