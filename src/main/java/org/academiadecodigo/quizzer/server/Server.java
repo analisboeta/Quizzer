@@ -6,9 +6,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Vector;
+import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,7 +20,7 @@ public class Server {
 
     private Socket clientSocket;
     private int portNumber;
-    private Vector<ServerConnection> playersList;
+    private Hashtable<InetAddress, Player> playersList;
     private int maxNrOfPlayers;
     private ExecutorService poolRejectPlayers = Executors.newFixedThreadPool(2);
 
@@ -28,8 +29,7 @@ public class Server {
 
         setPortNumber();
         maxNrOfPlayers = FinalVars.MAX_NR_PLAYERS;
-        playersList = new Vector<>();
-        createPlayersNr();
+        playersList = new Hashtable<>();
         startServer();
     }
 
@@ -37,8 +37,7 @@ public class Server {
 
         this.maxNrOfPlayers = maxNrOfPlayers;
         this.portNumber = portNumber;
-        playersList = new Vector<>();
-        createPlayersNr();
+        playersList = new Hashtable<>();
         startServer();
     }
 
@@ -56,10 +55,10 @@ public class Server {
 
     private void startServer() {
 
-        ServerConnection sC;
+        Player player;
         ExecutorService pool = Executors.newFixedThreadPool(maxNrOfPlayers);
 
-        System.out.println("Server listening on port " + portNumber + "\nover...");
+        System.out.println("Server listening on port " + portNumber + "\nWaiting for players...");
 
         broadcast("Waiting for more playersList on port..." + portNumber);
 
@@ -70,11 +69,11 @@ public class Server {
 
                 clientSocket = serverSocket.accept();
 
-                if (playersList.size() < maxNrOfPlayers) {
-                    sC = new ServerConnection(clientSocket, this);
-                    playersList.addElement(sC);
+                if (playersList.size() < maxNrOfPlayers && !playersList.containsKey(clientSocket.getInetAddress())) { // TODO: 18/11/16 build 2 server jars - LAN and WAN
+                    player = new Player(clientSocket, this);
+                    playersList.put(clientSocket.getInetAddress(), player);
                     System.out.println(clientSocket + " connected!\nTotal: " + playersList.size());
-                    pool.submit(sC);
+                    pool.submit(player);
                     continue;
                 }
                 rejectClient(clientSocket);
@@ -114,19 +113,21 @@ public class Server {
 
     public void broadcast(String message) {
 
-        for (ServerConnection client : playersList) {
+        for (Player client : playersList.values()) {
             client.sendMessage(message + "\n");
         }
     }
 
-    public void stopConnection(ServerConnection client, String playerName) {
+/*
+    public void stopConnection(String playerName) {
 
         if (!playersList.isEmpty()) {
             broadcast("\n" + (char) 27 + "[30;41;1m[" + playerName + "] as quit!" + (char) 27 + "[0m");
         }
-        playersList.removeElement(client);
-        System.out.println("Remaining playersList: " + playersList.size());
+        ;
+        System.out.println(playersList.remove(clientSocket.getInetAddress()) + "loose connection.\nRemaining players: " + playersList.size());
     }
+*/
 
     public int getNrOfMissingPlayers() {
         return maxNrOfPlayers - playersList.size();

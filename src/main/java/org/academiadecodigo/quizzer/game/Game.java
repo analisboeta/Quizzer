@@ -16,6 +16,11 @@ public class Game {
         return answer.equalsIgnoreCase(question[FinalVars.CORRECT_ANSWER_LETTER_INDEX]);
     }
 
+    public String getCorrectAnswer() {
+
+        return question[FinalVars.CORRECT_ANSWER_LETTER_INDEX];
+    }
+
     public String scoreBoard() {
 
         System.out.println("broadcast score of all players");
@@ -35,10 +40,10 @@ public class Game {
 
     private String questionBuilder() {
 
-        return "Question: " + question[0]+
-                "\nA: " + question[1]+
-                "\nB: " + question[2]+
-                "\nC: " + question[3]+
+        return "Question: " + question[0] +
+                "\nA: " + question[1] +
+                "\nB: " + question[2] +
+                "\nC: " + question[3] +
                 "\nD: " + question[4];
     }
 }
