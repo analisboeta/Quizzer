@@ -21,8 +21,7 @@ public class Server {
     private int portNumber;
     private Vector<ServerConnection> playersList;
     private int maxNrOfPlayers;
-    private String[] playersNr;
-    private ExecutorService poolRejectPlayers;// = Executors.newFixedThreadPool(2);
+    private ExecutorService poolRejectPlayers = Executors.newFixedThreadPool(2);
 
     /**
      * Server constructor.
@@ -176,13 +175,7 @@ public class Server {
         System.out.println("Remaining playersList: " + playersList.size());
     }
 
-    /**
-     * Sets the player number for each player that successfully connects to the server.
-     */
-    private void createPlayersNr() {
-        playersNr = new String[maxNrOfPlayers];
-        for (int i = 0; i < maxNrOfPlayers; i++) {
-            playersNr[i] = "[Player " + (i + 1) + "] ";
-        }
+    public int getNrOfMissingPlayers() {
+        return maxNrOfPlayers - playersList.size();
     }
 }
