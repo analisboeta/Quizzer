@@ -13,26 +13,32 @@ public class Game {
 
     public boolean verifyAnswer(String answer) {
 
-        return answer.equalsIgnoreCase(question[FinalVars.CHAR_ANSWER_INDEX]);
+        return answer.equalsIgnoreCase(question[FinalVars.CORRECT_ANSWER_LETTER_INDEX]);
     }
 
-    public void scoreBoard() {
+    public String scoreBoard() {
 
         System.out.println("broadcast score of all players");
+        return "broadcast score of all players";
     }
 
-    public void printQuestion() {
+    public String printQuestion() {
 
         if (handler == null) {
             handler = new QuestionHandler();
             handler.loadQuestions();
         }
         question = handler.pickQuestion();
-        System.out.println("question size: " + question.length);
-        System.out.println("Question: " + question[0]);
-        System.out.println("A: " + question[1]);
-        System.out.println("B: " + question[2]);
-        System.out.println("C: " + question[3]);
-        System.out.println("D: " + question[4]);
+
+        return questionBuilder();
+    }
+
+    private String questionBuilder() {
+
+        return "Question: " + question[0]+
+                "\nA: " + question[1]+
+                "\nB: " + question[2]+
+                "\nC: " + question[3]+
+                "\nD: " + question[4];
     }
 }

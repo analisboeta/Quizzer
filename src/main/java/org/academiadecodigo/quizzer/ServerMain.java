@@ -14,7 +14,7 @@ public class ServerMain {
         if (args.length < 1) {
             tcpServer = new Server();
         }else{
-            tcpServer = new Server(Integer.parseInt(args[0]));
+            tcpServer = new Server(Integer.parseInt(args[0]),Integer.parseInt(args[1]));
         }
     }
 }

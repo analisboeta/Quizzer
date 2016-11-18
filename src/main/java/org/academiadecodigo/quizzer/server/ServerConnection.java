@@ -22,6 +22,9 @@ public class ServerConnection implements Runnable {
 
     ServerConnection(Socket clientSocket, Server server) {
 
+        if (game == null) {
+            game = new Game();
+        }
         this.clientSocket = clientSocket;
         this.server = server;
     }
@@ -35,26 +38,29 @@ public class ServerConnection implements Runnable {
 
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            sendQuestion("Type Playername:");
+            sendMessage("Type your name:");
 
             message = in.readLine();
-            Thread.currentThread().setName(message);
-            server.broadcast("\n" + (char) 27 + "[30;42;1m[" + message + "] as joined the game" + (char) 27 + "[0m");
+            String pNumber = Thread.currentThread().getName().substring(Thread.currentThread().getName().length()-1);
+            System.out.println(pNumber);
+            Thread.currentThread().setName("[Player " + pNumber + "] " + message);
+            server.broadcast("\n" + (char) 27 + "[30;42;1m" + Thread.currentThread().getName() + " as joined the game" + (char) 27 + "[0m");
 
             while ((message = in.readLine()) != null) {
                 System.out.println(clientSocket.getLocalAddress().getHostName() + clientSocket.getInetAddress() +
                         " | " + Thread.currentThread().getName() + ": " + message);
 
-                if (message.startsWith("_")) {
-                    if (message.equalsIgnoreCase("_q_")) {
-                        server.stopConnection(this, Thread.currentThread().getName());
-                    }
-                } else {
-                    server.broadcast((char) 27 + "[31;1m" + Thread.currentThread().getName() + ": " + (char) 27 + "[0m" + message);
+                if (game.verifyAnswer(message)) {
+                    server.broadcast(Thread.currentThread().getName() + "won. Answer: " + message);
+                    server.broadcast(game.scoreBoard());
+                    Thread.sleep(1000);
+                    server.broadcast(game.printQuestion());
+
                 }
+
             }
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.getMessage();
             e.printStackTrace();
 
@@ -77,8 +83,8 @@ public class ServerConnection implements Runnable {
         }
     }
 
-    public void sendQuestion(String questionBlock) {
-        out.println(questionBlock);
+    public void sendMessage(String message) {
+        out.println(message);
         out.flush();
     }
 }

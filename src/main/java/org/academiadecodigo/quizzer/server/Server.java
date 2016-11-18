@@ -1,8 +1,11 @@
 package org.academiadecodigo.quizzer.server;
 
+import org.academiadecodigo.quizzer.finalvars.FinalVars;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
@@ -14,22 +17,29 @@ import java.util.concurrent.Executors;
  */
 public class Server {
 
-    private final int MAX_THREADS = 4;
     private Socket clientSocket;
     private int portNumber;
-    private Vector<ServerConnection> players;
+    private Vector<ServerConnection> playersList;
+    private int maxNrOfPlayers;
+    private String[] playersNr;
+    private ExecutorService poolRejectPlayers = Executors.newFixedThreadPool(2);
+
 
     public Server() {
 
         setPortNumber();
-        players = new Vector<>();
+        maxNrOfPlayers = FinalVars.MAX_NR_PLAYERS;
+        playersList = new Vector<>();
+        createPlayersNr();
         startServer();
     }
 
-    public Server(int portNumber) {
+    public Server(int portNumber, int maxNrOfPlayers) {
 
+        this.maxNrOfPlayers = maxNrOfPlayers;
         this.portNumber = portNumber;
-        players = new Vector<>();
+        playersList = new Vector<>();
+        createPlayersNr();
         startServer();
     }
 
@@ -41,26 +51,34 @@ public class Server {
         try {
             portNumber = Integer.parseInt(port.readLine());
         } catch (IOException | NumberFormatException e) {
-            portNumber = 6666;
+            portNumber = FinalVars.DEFAULT_PORT_NR;
         }
     }
 
     private void startServer() {
 
         ServerConnection sC;
-        ExecutorService pool = Executors.newFixedThreadPool(MAX_THREADS);
+        ExecutorService pool = Executors.newFixedThreadPool(maxNrOfPlayers);
 
-        broadcast("Waiting for more players on port...");
+        System.out.println("Server listening on port " + portNumber + "\nover...");
+
+        broadcast("Waiting for more playersList on port..." + portNumber);
 
         try {
             ServerSocket serverSocket = new ServerSocket(portNumber);
 
             while (true) {
+
                 clientSocket = serverSocket.accept();
-                sC = new ServerConnection(clientSocket, this);
-                players.addElement(sC);
-                System.out.println(clientSocket + " connected!\nTotal: " + players.size());
-                pool.submit(sC);
+
+                if (playersList.size() < maxNrOfPlayers) {
+                    sC = new ServerConnection(clientSocket, this);
+                    playersList.addElement(sC);
+                    System.out.println(clientSocket + " connected!\nTotal: " + playersList.size());
+                    pool.submit(sC);
+                    continue;
+                }
+                rejectClient(clientSocket);
             }
 
         } catch (IOException e) {
@@ -78,19 +96,47 @@ public class Server {
         }
     }
 
-    public void broadcast(String questionBlock) {
+    private void rejectClient(Socket clientSocket) {
 
-        for (ServerConnection client : players) {
-            client.sendQuestion(questionBlock + "\n");
+        poolRejectPlayers.submit(() -> { // "() ->" same as "new Runnable()"
+
+            try {
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                out.println(FinalVars.REJECTED_PLAYER_MESSAGE);
+                out.flush();
+                clientSocket.close();
+            } catch (IOException e) {
+                e.getMessage();
+                e.printStackTrace();
+            }
+
+        });
+    }
+
+    public void broadcast(String message) {
+
+        for (ServerConnection client : playersList) {
+            client.sendMessage(message + "\n");
         }
     }
 
     public void stopConnection(ServerConnection client, String playerName) {
 
-        if (!players.isEmpty()) {
+        if (!playersList.isEmpty()) {
             broadcast("\n" + (char) 27 + "[30;41;1m[" + playerName + "] as quit!" + (char) 27 + "[0m");
         }
-        players.removeElement(client);
-        System.out.println("Remaining players: " + players.size());
+        playersList.removeElement(client);
+        System.out.println("Remaining playersList: " + playersList.size());
+    }
+
+    private void createPlayersNr() {
+        playersNr = new String[maxNrOfPlayers];
+        for (int i = 0; i < maxNrOfPlayers; i++) {
+            playersNr[i] = "[Player " + (i + 1) + "] ";
+        }
+    }
+
+    public String getPlayersNr(int playerPos) {
+        return playersNr[playerPos];
     }
 }
