@@ -1,5 +1,6 @@
 package org.academiadecodigo.quizzer.server;
 
+import org.academiadecodigo.quizzer.finalvars.FinalVars;
 import org.academiadecodigo.quizzer.game.Game;
 
 import java.io.BufferedReader;
@@ -41,10 +42,10 @@ public class ServerConnection implements Runnable {
             sendMessage("Type your name:");
 
             message = in.readLine();
-            String pNumber = Thread.currentThread().getName().substring(Thread.currentThread().getName().length()-1);
+            String pNumber = Thread.currentThread().getName().substring(Thread.currentThread().getName().length() - 1);
             System.out.println(pNumber);
             Thread.currentThread().setName("[Player " + pNumber + "] " + message);
-            server.broadcast("\n" + (char) 27 + "[30;42;1m" + Thread.currentThread().getName() + " as joined the game" + (char) 27 + "[0m");
+            server.broadcast("\n" + (char) 27 + "[30;42;1m" + Thread.currentThread().getName() + " as joined the game" + (char) 27 + "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");
 
             while ((message = in.readLine()) != null) {
                 System.out.println(clientSocket.getLocalAddress().getHostName() + clientSocket.getInetAddress() +
