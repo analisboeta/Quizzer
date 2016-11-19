@@ -17,15 +17,8 @@ public class PlayersConnection implements Runnable {
     private Server server;
     private int score;
     private String name;
-//    private Game game;
 
     PlayersConnection(Socket clientSocket, Server server) {
-
-/*
-        if (game == null) {
-            game = new Game();
-        }
-*/
         this.clientSocket = clientSocket;
         this.server = server;
     }
@@ -48,36 +41,12 @@ public class PlayersConnection implements Runnable {
             name = Thread.currentThread().getName();
             server.startGame(name);
 
-            /*if (server.getNrOfMissingPlayers() > 0) {
-                server.broadcast("\n" + (char) 27 + "[30;42;1m" + Thread.currentThread().getName() + " as joined the game" + (char) 27 +
-                        "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");
-            } else {
-                server.broadcast("\n" + (char) 27 + "[30;42;1mStart the game" + (char) 27 + "[0m"); // TODO: 18/11/16 wait for player name
-                server.broadcast(game.printQuestion());
-                System.out.println("first question" + Thread.currentThread().getName());
+            while ((message = in.readLine()) != null) {
 
-            }*/
-
-                while ((message = in.readLine()) != null) {
-                    System.out.println(clientSocket.getLocalAddress().getHostName() + clientSocket.getInetAddress() +
-                            " | " + Thread.currentThread().getName() + ": " + message);
-                    server.receiveClientMessage(message, name);
-
-/*                    if (game.verifyAnswer(message)) {
-                        System.out.println("if correct answer" + Thread.currentThread().getName());
-                        server.broadcast(Thread.currentThread().getName() + " won the round.\nCorrect answer: " + game.getCorrectAnswer());
-                        server.broadcast(game.scoreBoard());
-                        Thread.sleep(1000);
-                    } else {
-                        System.out.println("else incorrect answer" + Thread.currentThread().getName());
-                        server.broadcast(Thread.currentThread().getName() + "has missed. \nCorrect answer: " + game.getCorrectAnswer());
-                        server.broadcast(game.scoreBoard());
-                        Thread.sleep(1000);
-                    }*/
-
-//                    server.broadcast(game.printQuestion());
-
-                }
+                System.out.println(clientSocket.getLocalAddress().getHostName() + clientSocket.getInetAddress() +
+                        " | " + Thread.currentThread().getName() + ": " + message);
+                server.receiveClientMessage(message, name);
+            }
 
 
         } catch (IOException e) {
@@ -85,10 +54,11 @@ public class PlayersConnection implements Runnable {
             e.printStackTrace();
 
         } finally {
-            System.out.println("@@@");
+            System.out.println(clientSocket.getInetAddress() + " ");
             try {
                 if (clientSocket != null) {
                     clientSocket.close();
+                    server.removeClient(clientSocket.getInetAddress(), clientSocket);
                 }
                 if (in != null) {
                     in.close();
@@ -101,6 +71,7 @@ public class PlayersConnection implements Runnable {
                 e.getMessage();
                 e.printStackTrace();
             }
+            //server.startServer(); //try to init the "waiting for clients" again - DOESN'T WORK BECAUSE PORT IS ALREADY IN USE
         }
     }
 
@@ -110,10 +81,14 @@ public class PlayersConnection implements Runnable {
     }
 
     public void setScore(int points) {
-        score += points;
+        score = score + points > 0 ? score + points : 0;
     }
 
     public String getName() {
         return name;
+    }
+
+    public int getScore() {
+        return score;
     }
 }

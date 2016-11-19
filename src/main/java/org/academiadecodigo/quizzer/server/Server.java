@@ -21,8 +21,8 @@ public class Server {
 
     private Socket clientSocket;
     private int portNumber;
-    private Hashtable<InetAddress, PlayersConnection> playersList;
-    private int maxNrOfPlayers;
+    private Hashtable<InetAddress, PlayersConnection> clientsList;
+    private int maxNrOfClients;
     private ExecutorService poolRejectPlayers;
     private Game game;
 
@@ -36,9 +36,9 @@ public class Server {
     public Server() {
 
         setPortNumber();
-        maxNrOfPlayers = FinalVars.MAX_NR_PLAYERS;
-        playersList = new Hashtable<>();
         game = new Game(this);
+        maxNrOfClients = game.getMaxNrOfPlayers();
+        clientsList = new Hashtable<>();
         startServer();
     }
 
@@ -46,17 +46,17 @@ public class Server {
      * Server Constructor.
      *
      * @param portNumber     the port number in which all connections will be set on.
-     * @param maxNrOfPlayers the maximum number of players that will be allowed to connect at a time.
+     * @param maxNrOfClients the maximum number of players that will be allowed to connect at a time.
      *                       Creates player list.
      *                       Calls a method to fill the list.
      *                       Starts the server.
      */
-    public Server(int portNumber, int maxNrOfPlayers) {
+    public Server(int portNumber, int maxNrOfClients) {
 
-        this.maxNrOfPlayers = maxNrOfPlayers;
         this.portNumber = portNumber;
-        playersList = new Hashtable<>();
         game = new Game(this);
+        this.maxNrOfClients = maxNrOfClients;
+        clientsList = new Hashtable<>();
         startServer();
     }
 
@@ -88,11 +88,11 @@ public class Server {
     private void startServer() {
 
         PlayersConnection playersConnection;
-        ExecutorService pool = Executors.newFixedThreadPool(maxNrOfPlayers);
+        ExecutorService pool = Executors.newFixedThreadPool(maxNrOfClients);
 
         System.out.println("Server listening on port " + portNumber + "\nWaiting for players...");
 
-        broadcast("Waiting for more playersList on port..." + portNumber);
+        broadcast("Waiting for more clientsList on port..." + portNumber);
 
         try {
             ServerSocket serverSocket = new ServerSocket(portNumber);
@@ -102,24 +102,26 @@ public class Server {
                 clientSocket = serverSocket.accept();
                 System.out.println("dentro do accept");
 
-                if (playersList.size() < maxNrOfPlayers && !playersList.containsKey(clientSocket.getInetAddress())) { // TODO: 18/11/16 build 2 server jars - LAN and WAN
+                if (clientsList.size() < maxNrOfClients && !clientsList.containsKey(clientSocket.getInetAddress())) { // TODO: 18/11/16 build 2 server jars - LAN and WAN
                     playersConnection = new PlayersConnection(clientSocket, this);
-                    playersList.put(clientSocket.getInetAddress(), playersConnection);
-                    System.out.println(clientSocket + " connected!\nTotal: " + playersList.size());
+                    clientsList.put(clientSocket.getInetAddress(), playersConnection);
+                    System.out.println(clientSocket + " connected!\nTotal: " + clientsList.size());
                     pool.submit(playersConnection);
                     continue;
                 }
                 rejectClient(clientSocket);
             }
 
-
         } catch (IOException e) {
+            e.getMessage();
             e.printStackTrace();
+
         } finally {
             try {
                 if (clientSocket != null) {
                     clientSocket.close();
                 }
+                System.exit(0);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -164,7 +166,7 @@ public class Server {
      */
     public synchronized void broadcast(String message) {
 
-        for (PlayersConnection client : playersList.values()) {
+        for (PlayersConnection client : clientsList.values()) {
             client.sendMessage(message + "\n");
         }
     }
@@ -180,16 +182,16 @@ public class Server {
      */
 /*    public void stopConnection(PlayersConnection client, String playerName) {
 
-        if (!playersList.isEmpty()) {
+        if (!clientsList.isEmpty()) {
             broadcast("\n" + (char) 27 + "[30;41;1m[" + playerName + "] as quit!" + (char) 27 + "[0m");
         }
         ;
-        System.out.println(playersList.remove(clientSocket.getInetAddress()) + "loose connection.\nRemaining players: " + playersList.size());
+        System.out.println(clientsList.remove(clientSocket.getInetAddress()) + "loose connection.\nRemaining players: " + clientsList.size());
     }
 */
 
     public int getNrOfMissingPlayers() {
-        return maxNrOfPlayers - playersList.size();
+        return maxNrOfClients - clientsList.size();
     }
 
     public void startGame(String clientName) {
@@ -201,13 +203,23 @@ public class Server {
     }
 
     public void actualizeScores(String playerName, int points) {
-        for (PlayersConnection client : playersList.values()) {
+        for (PlayersConnection client : clientsList.values()) {
             if (client.getName().equals(playerName)) {
                 client.setScore(points);
             }
         }
+    }
 
+    public void printScoreboard() {
+        String scoreBoard = "";
+        for (PlayersConnection client : clientsList.values()) {
+            scoreBoard += client.getName() + "| Score: " + client.getScore() + "\n";
+        }
+        broadcast(scoreBoard);
+    }
 
+    public boolean removeClient(InetAddress ip, Socket clientSocket) {
+        return clientsList.remove(ip, clientSocket);
     }
 
 }

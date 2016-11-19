@@ -10,6 +10,7 @@ public class ServerMain {
 
     public static void main(String[] args) {
 
+
         Server tcpServer = null;
 
         if (args.length < 1) {
@@ -17,6 +18,8 @@ public class ServerMain {
         }else{
             tcpServer = new Server(Integer.parseInt(args[0]),Integer.parseInt(args[1]));
         }
+
+//        new Game(new Server());
 
     }
 }

@@ -20,7 +20,7 @@ public class Server {
     private Socket clientSocket;
     private int portNumber;
     private Vector<ServerConnection> playersList;
-    private int maxNrOfPlayers;
+    private int maxNrOfClients;
 <<<<<<< HEAD
     private String[] playersNr;
     private ExecutorService poolRejectPlayers;// = Executors.newFixedThreadPool(2);
@@ -40,7 +40,7 @@ public class Server {
     public Server() {
 
         setPortNumber();
-        maxNrOfPlayers = FinalVars.MAX_NR_PLAYERS;
+        maxNrOfClients = FinalVars.MAX_NR_PLAYERS;
         playersList = new Vector<>();
         createPlayersNr();
         startServer();
@@ -49,14 +49,14 @@ public class Server {
     /**
      * Server Constructor.
      * @param portNumber the port number in which all connections will be set on.
-     * @param maxNrOfPlayers the maximum number of players that will be allowed to connect at a time.
+     * @param maxNrOfClients the maximum number of players that will be allowed to connect at a time.
      * Creates playerConnections list.
      * Calls a method to fill the list.
      * Starts the server.
      */
-    public Server(int portNumber, int maxNrOfPlayers) {
+    public Server(int portNumber, int maxNrOfClients) {
 
-        this.maxNrOfPlayers = maxNrOfPlayers;
+        this.maxNrOfClients = maxNrOfClients;
         this.portNumber = portNumber;
         playersList = new Vector<>();
         createPlayersNr();
@@ -91,7 +91,7 @@ public class Server {
     private void startServer() {
 
         ServerConnection sC;
-        ExecutorService pool = Executors.newFixedThreadPool(maxNrOfPlayers);
+        ExecutorService pool = Executors.newFixedThreadPool(maxNrOfClients);
 
         System.out.println("Server listening on port " + portNumber + "\nover...");
 
@@ -104,7 +104,7 @@ public class Server {
 
                 clientSocket = serverSocket.accept();
 
-                if (playersList.size() < maxNrOfPlayers) {
+                if (playersList.size() < maxNrOfClients) {
                     sC = new ServerConnection(clientSocket, this);
                     playersList.addElement(sC);
                     System.out.println(clientSocket + " connected!\nTotal: " + playersList.size());
@@ -187,13 +187,13 @@ public class Server {
      * Sets the playerConnections number for each playerConnections that successfully connects to the server.
      */
     private void createPlayersNr() {
-        playersNr = new String[maxNrOfPlayers];
-        for (int i = 0; i < maxNrOfPlayers; i++) {
+        playersNr = new String[maxNrOfClients];
+        for (int i = 0; i < maxNrOfClients; i++) {
             playersNr[i] = "[Player " + (i + 1) + "] ";
         }
 =======
     public int getNrOfMissingPlayers() {
-        return maxNrOfPlayers - playersList.size();
+        return maxNrOfClients - playersList.size();
 >>>>>>> 70e618875dbd0ae55b7a72010384993c0cce4bc5
     }
 }

@@ -33,32 +33,29 @@ public class Game {
         } else {
             server.broadcast("\n" + (char) 27 + "[30;42;1mStart the game" + (char) 27 + "[0m"); // TODO: 18/11/16 wait for player name
             server.broadcast(printQuestion());
-            System.out.println("first question" + playerName);
-
         }
-        System.out.println(playerName + " " );
-
-
     }
 
-    public void gameFlow(String message, String playerName) {
+    public synchronized void gameFlow(String message, String playerName) {
 
         try {
             Thread.sleep(1000);
+            if (verifyAnswer(message)) {
+                System.out.println("if correct answer" + playerName);
+                server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
+                server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
+            } else {
+                System.out.println("else incorrect answer" + playerName);
+                server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
+                server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+            }
+            server.printScoreboard();
+            wait(2500);
+            server.broadcast(printQuestion());
         } catch (InterruptedException e) {
             e.getMessage();
             e.printStackTrace();
         }
-        if (verifyAnswer(message)) {
-            System.out.println("if correct answer" + playerName);
-            server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
-            server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
-        } else {
-            System.out.println("else incorrect answer" + playerName);
-            server.broadcast(playerName + "has missed. \nCorrect answer: " + getCorrectAnswer());
-            server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER * -1);
-        }
-        server.broadcast(scoreBoard());
     }
 
     /**
@@ -77,16 +74,6 @@ public class Game {
         return question[FinalVars.CORRECT_ANSWER_LETTER_INDEX];
     }
 
-
-    /**
-     * SCORE BOARD IT WILL EVENTUALLY DO SOMETHING MORE INTERESTING THAN A SOUT
-     */
-    public String scoreBoard() {
-
-        System.out.println("broadcast score of all players");
-        return "broadcast score of all players";
-    }
-
     /**
      * Prints a question
      * If there is no handler, it will instantiate one and it will load the questions
@@ -103,7 +90,6 @@ public class Game {
         return questionBuilder();
     }
 
-
     /**
      * Builds questions. It places the question and the four options below.
      *
@@ -115,6 +101,10 @@ public class Game {
                 QuestionBuildType.FIRSTANSWER.getText() + question[1] +
                 QuestionBuildType.SECONDANSWER.getText() + question[2] +
                 QuestionBuildType.THIRDANSWER.getText() + question[3] +
-                QuestionBuildType.THIRDANSWER.getText() + question[4];
+                QuestionBuildType.FOURTHANSWER.getText() + question[4];
+    }
+
+    public int getMaxNrOfPlayers() {
+        return maxNrOfPlayers;
     }
 }
