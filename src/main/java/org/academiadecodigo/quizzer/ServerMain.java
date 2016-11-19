@@ -1,5 +1,6 @@
 package org.academiadecodigo.quizzer;
 
+import org.academiadecodigo.quizzer.game.Game;
 import org.academiadecodigo.quizzer.server.Server;
 
 /**
@@ -16,5 +17,6 @@ public class ServerMain {
         }else{
             tcpServer = new Server(Integer.parseInt(args[0]),Integer.parseInt(args[1]));
         }
+
     }
 }

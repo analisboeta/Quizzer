@@ -2,7 +2,7 @@ package org.academiadecodigo.quizzer.game;
 
 import org.academiadecodigo.quizzer.FileManager;
 import org.academiadecodigo.quizzer.RandomGenerator;
-import org.academiadecodigo.quizzer.finalvars.FinalVars;
+import org.academiadecodigo.quizzer.constants.FinalVars;
 
 import java.io.IOException;
 import java.util.LinkedList;

@@ -1,4 +1,4 @@
-package org.academiadecodigo.quizzer.finalvars;
+package org.academiadecodigo.quizzer.constants;
 
 /**
  * Created by codecadet on 17/11/16.
@@ -10,5 +10,6 @@ public class FinalVars {
     public static final int CORRECT_ANSWER_LETTER_INDEX = 5;
     public static final int MAX_NR_PLAYERS = 2;
     public static final int DEFAULT_PORT_NR = 8888;
-    public static final String REJECTED_PLAYER_MESSAGE = "Player already connected/Maximum number of players reached.\nTry again later...";
+    public static final String REJECTED_PLAYER_MESSAGE = "PlayersConnection already connected/Maximum number of players reached.\nTry again later...";
+    public static final int POINTS_FOR_ANSWER = 1;
 }

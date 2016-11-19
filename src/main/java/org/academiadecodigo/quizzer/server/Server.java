@@ -1,6 +1,7 @@
 package org.academiadecodigo.quizzer.server;
 
-import org.academiadecodigo.quizzer.finalvars.FinalVars;
+import org.academiadecodigo.quizzer.constants.FinalVars;
+import org.academiadecodigo.quizzer.game.Game;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,9 +21,10 @@ public class Server {
 
     private Socket clientSocket;
     private int portNumber;
-    private Hashtable<InetAddress, Player> playersList;
+    private Hashtable<InetAddress, PlayersConnection> playersList;
     private int maxNrOfPlayers;
-    private ExecutorService poolRejectPlayers = Executors.newFixedThreadPool(2);
+    private ExecutorService poolRejectPlayers;
+    private Game game;
 
     /**
      * Server constructor.
@@ -36,22 +38,25 @@ public class Server {
         setPortNumber();
         maxNrOfPlayers = FinalVars.MAX_NR_PLAYERS;
         playersList = new Hashtable<>();
+        game = new Game(this);
         startServer();
     }
 
     /**
      * Server Constructor.
-     * @param portNumber the port number in which all connections will be set on.
+     *
+     * @param portNumber     the port number in which all connections will be set on.
      * @param maxNrOfPlayers the maximum number of players that will be allowed to connect at a time.
-     * Creates player list.
-     * Calls a method to fill the list.
-     * Starts the server.
+     *                       Creates player list.
+     *                       Calls a method to fill the list.
+     *                       Starts the server.
      */
     public Server(int portNumber, int maxNrOfPlayers) {
 
         this.maxNrOfPlayers = maxNrOfPlayers;
         this.portNumber = portNumber;
         playersList = new Hashtable<>();
+        game = new Game(this);
         startServer();
     }
 
@@ -82,7 +87,7 @@ public class Server {
      */
     private void startServer() {
 
-        Player player;
+        PlayersConnection playersConnection;
         ExecutorService pool = Executors.newFixedThreadPool(maxNrOfPlayers);
 
         System.out.println("Server listening on port " + portNumber + "\nWaiting for players...");
@@ -95,16 +100,18 @@ public class Server {
             while (true) {
 
                 clientSocket = serverSocket.accept();
+                System.out.println("dentro do accept");
 
                 if (playersList.size() < maxNrOfPlayers && !playersList.containsKey(clientSocket.getInetAddress())) { // TODO: 18/11/16 build 2 server jars - LAN and WAN
-                    player = new Player(clientSocket, this);
-                    playersList.put(clientSocket.getInetAddress(), player);
+                    playersConnection = new PlayersConnection(clientSocket, this);
+                    playersList.put(clientSocket.getInetAddress(), playersConnection);
                     System.out.println(clientSocket + " connected!\nTotal: " + playersList.size());
-                    pool.submit(player);
+                    pool.submit(playersConnection);
                     continue;
                 }
                 rejectClient(clientSocket);
             }
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -123,13 +130,16 @@ public class Server {
 
     /**
      * Rejects a client.
+     *
      * @param clientSocket to identify the client that tries to connect over the maximum number of clients established.
-     * The number of players that try to connect after the maximum number of players has been reached, will be inserted
-     * in a new pool. An output stream is set to send a "try again later" type message and the connection will be immediatly over.
+     *                     The number of players that try to connect after the maximum number of players has been reached, will be inserted
+     *                     in a new pool. An output stream is set to send a "try again later" type message and the connection will be immediatly over.
      */
     private void rejectClient(Socket clientSocket) {
 
-        poolRejectPlayers = Executors.newFixedThreadPool(2);
+        if (poolRejectPlayers == null) {
+            poolRejectPlayers = Executors.newFixedThreadPool(2);
+        }
         poolRejectPlayers.submit(() -> { // "() ->" same as "new Runnable()"
 
             try {
@@ -148,12 +158,13 @@ public class Server {
 
     /**
      * Broadcasts message to every client.
+     *
      * @param message that will be sent as a response to clients.
-     * For every client on the player list, the server will send a message.
+     *                For every client on the player list, the server will send a message.
      */
-    public void broadcast(String message) {
+    public synchronized void broadcast(String message) {
 
-        for (Player client : playersList.values()) {
+        for (PlayersConnection client : playersList.values()) {
             client.sendMessage(message + "\n");
         }
     }
@@ -167,7 +178,7 @@ public class Server {
      * If the list of players is not empty it will broadcast a message with the name of the player when he quits, removing him from the list.
      * Otherwise it will print out then names of players still in the game.
      */
-/*    public void stopConnection(Player client, String playerName) {
+/*    public void stopConnection(PlayersConnection client, String playerName) {
 
         if (!playersList.isEmpty()) {
             broadcast("\n" + (char) 27 + "[30;41;1m[" + playerName + "] as quit!" + (char) 27 + "[0m");
@@ -180,4 +191,23 @@ public class Server {
     public int getNrOfMissingPlayers() {
         return maxNrOfPlayers - playersList.size();
     }
+
+    public void startGame(String clientName) {
+        game.startGame(clientName);
+    }
+
+    public void receiveClientMessage(String message, String playerName) {
+        game.gameFlow(message, playerName);
+    }
+
+    public void actualizeScores(String playerName, int points) {
+        for (PlayersConnection client : playersList.values()) {
+            if (client.getName().equals(playerName)) {
+                client.setScore(points);
+            }
+        }
+
+
+    }
+
 }
