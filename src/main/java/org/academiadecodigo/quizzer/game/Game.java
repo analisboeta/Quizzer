@@ -26,6 +26,12 @@ public class Game {
         maxNrOfPlayers = FinalVars.MAX_NR_PLAYERS;
     }
 
+
+    /**
+     * Game starter
+     * @param playerName name of the player.
+     *                   If the minimum number of players are connected, the server sends a "Start game" message and prints a question to the players.
+     */
     public synchronized void startGame(String playerName) {
 
 
@@ -42,6 +48,11 @@ public class Game {
         }
     }
 
+    /**
+     *
+     * @param message
+     * @param playerName name of the player.
+     */
     public synchronized void gameFlow(String message, String playerName) {
 
 
