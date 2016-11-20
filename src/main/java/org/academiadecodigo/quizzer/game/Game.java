@@ -13,7 +13,8 @@ public class Game {
     private QuestionHandler handler;
     private Server server;
     private int maxNrOfPlayers;
-
+    private boolean questionAnswered;
+    private int aux = 0;
 
     public Game(Server server, int maxNrOfPlayers) {
         this.server = server;
@@ -25,37 +26,74 @@ public class Game {
         maxNrOfPlayers = FinalVars.MAX_NR_PLAYERS;
     }
 
-    public void startGame(String playerName) {
+    public synchronized void startGame(String playerName) {
 
-        if (server.getNrOfMissingPlayers() > 0) {
-            server.broadcast("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
-                    "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");
+
+   /*     server.broadcast("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
+                "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");*/
+
+        aux++;
+        if (server.getNrOfMissingPlayers() > 0 || aux < FinalVars.MAX_NR_PLAYERS) {
+            return;
         } else {
-            server.broadcast("\n" + (char) 27 + "[30;42;1mStart the game" + (char) 27 + "[0m"); // TODO: 18/11/16 wait for player name
+                System.out.println("Question Answered" + questionAnswered);
+            server.broadcast("\n" + (char) 27 + "[30;42;1mStart the game" + (char) 27 + "[0m");
             server.broadcast(printQuestion());
         }
     }
 
     public synchronized void gameFlow(String message, String playerName) {
 
+
+        /**
+         *  boolean timeRunOut;
+         * todo testar se esta porra do resposta dada funciona
+         */
+
+        System.out.println("alguém respondeu: " + questionAnswered);
+
         try {
-            Thread.sleep(1000);
-            if (verifyAnswer(message)) {
-                System.out.println("if correct answer" + playerName);
-                server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
-                server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
+            if (!message.equals(FinalVars.TIME_RUN_OUT_STRING) && !playerName.equals(FinalVars.TIME_RUN_OUT_STRING)) {
+                if (questionAnswered) {
+                    if (verifyAnswer(message)) {
+                        //questionAnswered = true;
+                        System.out.println("if correct answer" + playerName);
+                        server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
+                        server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
+
+                    } else {
+                        System.out.println("else incorrect answer" + playerName);
+                        server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
+                        server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+                    }
+                }
             } else {
-                System.out.println("else incorrect answer" + playerName);
-                server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
-                server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+                System.out.println("answer timeout" + playerName);
+               /* server.broadcast("Time Out!!! Correct answer: " + getCorrectAnswer());
+                server.actualizeScores("FinalVars.TIME_RUN_OUT", (-FinalVars.POINTS_FOR_ANSWER));*/
             }
             server.printScoreboard();
-            wait(2500);
+            wait(1000);
+            questionAnswered = false;
             server.broadcast(printQuestion());
+
+            /**
+             * todo timeout não funca.
+             * penso que terá que ver com a condição
+             */
+/*            timeRunOut = true;
+            wait(FinalVars.TIME_TO_ANSWER);
+            notifyAll();
+            if (timeRunOut) {
+                gameFlow(FinalVars.TIME_RUN_OUT_STRING, FinalVars.TIME_RUN_OUT_STRING);
+                return;
+            }*/
         } catch (InterruptedException e) {
             e.getMessage();
             e.printStackTrace();
         }
+        System.out.println("alguém respondeu fim método: " + questionAnswered);
+
     }
 
     /**
@@ -64,12 +102,13 @@ public class Game {
      * @param answer the input from the player
      * @return boolean
      */
-    public boolean verifyAnswer(String answer) {
 
-        return answer.equalsIgnoreCase(question[FinalVars.CORRECT_ANSWER_LETTER_INDEX]);
+    private boolean verifyAnswer(String answer) {
+
+        return answer.toUpperCase().equals(question[FinalVars.CORRECT_ANSWER_LETTER_INDEX]);
     }
 
-    public String getCorrectAnswer() {
+    private String getCorrectAnswer() {
 
         return question[FinalVars.CORRECT_ANSWER_LETTER_INDEX];
     }
@@ -79,7 +118,7 @@ public class Game {
      * If there is no handler, it will instantiate one and it will load the questions
      * Uses method from the handler to pick a question.
      */
-    public String printQuestion() {
+    private String printQuestion() {
 
         if (handler == null) {
             handler = new QuestionHandler();
@@ -97,14 +136,32 @@ public class Game {
      */
     private String questionBuilder() {
 
-        return QuestionBuildType.QUESTION.getText() + question[0] +
-                QuestionBuildType.FIRSTANSWER.getText() + question[1] +
-                QuestionBuildType.SECONDANSWER.getText() + question[2] +
-                QuestionBuildType.THIRDANSWER.getText() + question[3] +
-                QuestionBuildType.FOURTHANSWER.getText() + question[4];
+        return String.format("%s \n%-30s %s \n%-30s %s",
+                (char) 27 + "[37;40;1m" + question[0] + (char) 27 + "[0m",
+                (char) 27 + "[31;1m" + QuestionBuildType.FIRSTANSWER.getText() + (char) 27 + "[0m" + question[1],
+                (char) 27 + "[31;1m" + QuestionBuildType.SECONDANSWER.getText() + (char) 27 + "[0m" + question[2],
+                (char) 27 + "[31;1m" + QuestionBuildType.THIRDANSWER.getText() + (char) 27 + "[0m" + question[3],
+                (char) 27 + "[31;1m" + QuestionBuildType.FOURTHANSWER.getText() + (char) 27 + "[0m" + question[4]);
+/*
+        return (char) 27 + "[37;40;1m" + question[0] + (char) 27 + "[0m" +
+                (char) 27 + "[31;1m" + QuestionBuildType.FIRSTANSWER.getText() + (char) 27 + "[0m" + question[1] +
+                (char) 27 + "[31;1m" + QuestionBuildType.SECONDANSWER.getText() + (char) 27 + "[0m" + question[2] +
+                (char) 27 + "[31;1m" + QuestionBuildType.THIRDANSWER.getText() + (char) 27 + "[0m" + question[3] +
+                (char) 27 + "[31;1m" + QuestionBuildType.FOURTHANSWER.getText() + (char) 27 + "[0m" + question[4];
+*/
     }
 
     public int getMaxNrOfPlayers() {
+
         return maxNrOfPlayers;
+    }
+
+    public boolean isQuestionAnswered() {
+
+        return questionAnswered;
+    }
+
+    public void setQuestionAnswered(boolean questionAnswered) {
+        this.questionAnswered = questionAnswered;
     }
 }

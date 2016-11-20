@@ -1,5 +1,6 @@
 package org.academiadecodigo.quizzer.server;
 
+import org.academiadecodigo.quizzer.constants.FinalVars;
 import org.academiadecodigo.quizzer.game.Game;
 
 import java.io.*;
@@ -9,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Created by Neiva on 10-11-2016.
  */
-public class PlayersConnection implements Runnable {
+class ClientsConnection implements Runnable {
 
     private Socket clientSocket;
     private PrintWriter out;
@@ -18,7 +19,7 @@ public class PlayersConnection implements Runnable {
     private int score;
     private String name;
 
-    PlayersConnection(Socket clientSocket, Server server) {
+    ClientsConnection(Socket clientSocket, Server server) {
         this.clientSocket = clientSocket;
         this.server = server;
     }
@@ -30,35 +31,34 @@ public class PlayersConnection implements Runnable {
 
         try {
 
-            out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.ISO_8859_1), true);
+            out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             sendMessage("Type your name:");
 
             message = in.readLine();
+            //server.nameTyped();
 
             String pNumber = Thread.currentThread().getName().substring(Thread.currentThread().getName().length() - 1);
             Thread.currentThread().setName("[Player " + pNumber + "] " + message);
             name = Thread.currentThread().getName();
+
+            if (!name.equals("")){
             server.startGame(name);
-
-            while ((message = in.readLine()) != null) {
-
-                System.out.println(clientSocket.getLocalAddress().getHostName() + clientSocket.getInetAddress() +
-                        " | " + Thread.currentThread().getName() + ": " + message);
-                server.receiveClientMessage(message, name);
             }
 
-
+            while ((message = in.readLine()) != null) {
+                server.serverSetQuestionAnswered(true);
+                System.out.println(clientSocket.getLocalAddress().getHostName() + clientSocket.getInetAddress() +
+                        " | " + Thread.currentThread().getName() + ": " + message);
+                    server.receiveClientMessage(message, name);
+            }
         } catch (IOException e) {
             e.getMessage();
             e.printStackTrace();
-
         } finally {
-            System.out.println(clientSocket.getInetAddress() + " ");
             try {
                 if (clientSocket != null) {
                     clientSocket.close();
-                    server.removeClient(clientSocket.getInetAddress(), clientSocket);
                 }
                 if (in != null) {
                     in.close();
@@ -71,24 +71,27 @@ public class PlayersConnection implements Runnable {
                 e.getMessage();
                 e.printStackTrace();
             }
-            //server.startServer(); //try to init the "waiting for clients" again - DOESN'T WORK BECAUSE PORT IS ALREADY IN USE
         }
     }
 
-    public void sendMessage(String message) {
+    void sendMessage(String message) {
+
         out.println(message);
         out.flush();
     }
 
-    public void setScore(int points) {
+    void setScore(int points) {
+
         score = score + points > 0 ? score + points : 0;
     }
 
-    public String getName() {
+    String getName() {
+
         return name;
     }
 
-    public int getScore() {
+    int getScore() {
+
         return score;
     }
 }

@@ -5,11 +5,10 @@ package org.academiadecodigo.quizzer.constants;
  */
 public enum QuestionBuildType {
 
-    QUESTION("Question "),
-    FIRSTANSWER("\nA: "),
-    SECONDANSWER("\nB: "),
-    THIRDANSWER("\nC: "),
-    FOURTHANSWER("\nD: ");
+    FIRSTANSWER("A: "),
+    SECONDANSWER("B: "),
+    THIRDANSWER("C: "),
+    FOURTHANSWER("D: ");
 
     QuestionBuildType(String text) {
         this.text = text;

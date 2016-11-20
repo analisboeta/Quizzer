@@ -21,7 +21,7 @@ public class Server {
 
     private Socket clientSocket;
     private int portNumber;
-    private Hashtable<InetAddress, PlayersConnection> clientsList;
+    private Hashtable<InetAddress, ClientsConnection> clientsList;
     private int maxNrOfClients;
     private ExecutorService poolRejectPlayers;
     private Game game;
@@ -87,7 +87,7 @@ public class Server {
      */
     private void startServer() {
 
-        PlayersConnection playersConnection;
+        ClientsConnection clientsConnection;
         ExecutorService pool = Executors.newFixedThreadPool(maxNrOfClients);
 
         System.out.println("Server listening on port " + portNumber + "\nWaiting for players...");
@@ -96,26 +96,48 @@ public class Server {
 
         try {
             ServerSocket serverSocket = new ServerSocket(portNumber);
-
+            //int counter = 0;
             while (true) {
-
                 clientSocket = serverSocket.accept();
-                System.out.println("dentro do accept");
 
                 if (clientsList.size() < maxNrOfClients && !clientsList.containsKey(clientSocket.getInetAddress())) { // TODO: 18/11/16 build 2 server jars - LAN and WAN
-                    playersConnection = new PlayersConnection(clientSocket, this);
-                    clientsList.put(clientSocket.getInetAddress(), playersConnection);
+                    clientsConnection = new ClientsConnection(clientSocket, this);
+                    clientsList.put(clientSocket.getInetAddress(), clientsConnection);
                     System.out.println(clientSocket + " connected!\nTotal: " + clientsList.size());
-                    pool.submit(playersConnection);
+                    pool.submit(clientsConnection);
+/*
+                    try {
+
+                        */
+/**
+ * todo synchro não funciona
+ * fica em wait infinito
+ * estou sem ideias
+ * vou lanchar
+ *//*
+
+                        synchronized (this) {
+                            counter++;
+                            while (counter < maxNrOfClients) {
+                                System.out.println("counter: " + counter);
+                                wait();
+                                System.out.println("counter after wait: " + counter);
+                            }
+                        }
+
+                        //SYNCHRO ATÉ AQUI!!!!!!
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("saí do wait");
+*/
                     continue;
                 }
                 rejectClient(clientSocket);
             }
-
         } catch (IOException e) {
             e.getMessage();
             e.printStackTrace();
-
         } finally {
             try {
                 if (clientSocket != null) {
@@ -166,11 +188,18 @@ public class Server {
      */
     public synchronized void broadcast(String message) {
 
-        for (PlayersConnection client : clientsList.values()) {
-            client.sendMessage(message + "\n");
+        for (ClientsConnection client : clientsList.values()) {
+            client.sendMessage("\n" + message);
         }
     }
 
+    public synchronized void sendPrivateMessage(String message, String PlayerName) {
+
+        for (ClientsConnection client : clientsList.values()) {
+            if(clientsList.values().equals(PlayerName))
+            client.sendMessage("\n" + message);
+        }
+    }
 /*
     public void stopConnection(String playerName) {
     /**
@@ -180,7 +209,7 @@ public class Server {
      * If the list of players is not empty it will broadcast a message with the name of the player when he quits, removing him from the list.
      * Otherwise it will print out then names of players still in the game.
      */
-/*    public void stopConnection(PlayersConnection client, String playerName) {
+/*    public void stopConnection(ClientsConnection client, String playerName) {
 
         if (!clientsList.isEmpty()) {
             broadcast("\n" + (char) 27 + "[30;41;1m[" + playerName + "] as quit!" + (char) 27 + "[0m");
@@ -191,35 +220,56 @@ public class Server {
 */
 
     public int getNrOfMissingPlayers() {
+
         return maxNrOfClients - clientsList.size();
     }
 
-    public void startGame(String clientName) {
+    void startGame(String clientName) {
+
         game.startGame(clientName);
     }
 
-    public void receiveClientMessage(String message, String playerName) {
-        game.gameFlow(message, playerName);
+    synchronized void receiveClientMessage(String message, String playerName) {
+        if (game.isQuestionAnswered()) {
+            game.gameFlow(message, playerName);
+        }
     }
 
     public void actualizeScores(String playerName, int points) {
-        for (PlayersConnection client : clientsList.values()) {
+
+        for (ClientsConnection client : clientsList.values()) {
             if (client.getName().equals(playerName)) {
                 client.setScore(points);
+                return;
             }
         }
     }
 
     public void printScoreboard() {
+
         String scoreBoard = "";
-        for (PlayersConnection client : clientsList.values()) {
-            scoreBoard += client.getName() + "| Score: " + client.getScore() + "\n";
+        for (ClientsConnection client : clientsList.values()) {
+            scoreBoard += client.getName() + " | Score: " + client.getScore() + "\t";
         }
         broadcast(scoreBoard);
     }
 
     public boolean removeClient(InetAddress ip, Socket clientSocket) {
+
         return clientsList.remove(ip, clientSocket);
     }
 
+    void nameTyped() {
+
+        System.out.println("entrei no name typed");
+        notifyAll();
+    }
+
+    public void serverSetQuestionAnswered(boolean questionAnswered){
+        game.setQuestionAnswered(questionAnswered);
+    }
+
+    public boolean isQuestionAnswerd(){
+        return game.isQuestionAnswered();
+    }
 }
