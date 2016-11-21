@@ -15,6 +15,8 @@ public class Game {
     private int maxNrOfPlayers;
     private boolean questionAnswered;
     private int aux = 0;
+    private int playersConnected = 0;
+    private int roundsCounter = 0;
 
 
     public Game(Server server, int maxNrOfPlayers) {
@@ -37,6 +39,8 @@ public class Game {
      */
     public synchronized void startGame(String playerName) {
 
+        server.broadcast("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
+                "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");
 
         aux++;
         if (server.getNrOfMissingPlayers() > 0 || aux < FinalVars.MAX_NR_PLAYERS) {
@@ -61,36 +65,55 @@ public class Game {
 
         System.out.println("someone answered: " + questionAnswered);
 
-        try {
-            if (!message.equals(FinalVars.TIME_RUN_OUT_STRING) && !playerName.equals(FinalVars.TIME_RUN_OUT_STRING)) {
-                if (questionAnswered) {
-                    if (verifyAnswer(message)) {
-                        System.out.println("if correct answer" + playerName);
-                        server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
-                        server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
+        /**
+         *  boolean timeRunOut;
+         * todo testar se esta porra do resposta dada funciona
+         */
 
-                    } else {
-                        System.out.println("else incorrect answer" + playerName);
-                        server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
-                        server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+            try {
+                roundsCounter++;
+                if (!message.equals(FinalVars.TIME_RUN_OUT_STRING) && !playerName.equals(FinalVars.TIME_RUN_OUT_STRING)) {
+                    if (questionAnswered) {
+                        if (verifyAnswer(message)) {
+                            System.out.println("alguém respondeu: " + questionAnswered);
+                            //questionAnswered = true;
+                            System.out.println("if correct answer" + playerName);
+                            server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
+                            server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
+
+                        } else {
+                            System.out.println("else incorrect answer" + playerName);
+                            server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
+                            server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+                        }
                     }
+                } else {
+                    System.out.println("answer timeout" + playerName);
+               /* server.broadcast("Time Out!!! Correct answer: " + getCorrectAnswer());
+                server.actualizeScores("FinalVars.TIME_RUN_OUT", (-FinalVars.POINTS_FOR_ANSWER));*/
                 }
-            } else {
-                System.out.println("answer timeout" + playerName);
+                if(roundsCounter == FinalVars.TOTAL_OF_QUESTIONS){
+                    server.printScoreboard();
+                    //TODO END OF GAME STYLISH
+                    Thread.sleep(3000);
+                    server.endGame();
+                }
+                server.printScoreboard();
+                wait(1000);
+                questionAnswered = false;
+                server.broadcast(printQuestion());
 
+                /**
+                 * todo timeout não funca.
+                 * penso que terá que ver com a condição
+                 */
+
+            } catch (InterruptedException e) {
+                e.getMessage();
+                e.printStackTrace();
             }
-            server.printScoreboard();
-            wait(1000);
-            questionAnswered = false;
-            server.broadcast(printQuestion());
-
-        } catch (InterruptedException e) {
-            e.getMessage();
-            e.printStackTrace();
+            System.out.println("alguém respondeu fim método: " + questionAnswered);
         }
-        System.out.println("alguém respondeu fim método: " + questionAnswered);
-
-    }
 
     /**
      * Verifies answer
@@ -151,6 +174,10 @@ public class Game {
     public int getMaxNrOfPlayers() {
 
         return maxNrOfPlayers;
+    }
+
+    public void setMaxNrOfPlayers(int maxNrOfPlayers) {
+        this.maxNrOfPlayers = maxNrOfPlayers;
     }
 
     public boolean isQuestionAnswered() {

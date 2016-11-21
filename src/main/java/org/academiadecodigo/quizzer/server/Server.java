@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Hashtable;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,7 +38,8 @@ public class Server {
 
         setPortNumber();
         game = new Game(this);
-        maxNrOfClients = game.getMaxNrOfPlayers();
+        game.setMaxNrOfPlayers(maxNrOfClients);
+       // maxNrOfClients = game.getMaxNrOfPlayers();
         clientsList = new Hashtable<>();
         startServer();
     }
@@ -66,13 +68,17 @@ public class Server {
      */
     private void setPortNumber() {
 
-        System.out.print("Type the Port number: ");
-        BufferedReader port = new BufferedReader(new InputStreamReader(System.in));
-
         try {
-            portNumber = Integer.parseInt(port.readLine());
-        } catch (IOException | NumberFormatException e) {
+        System.out.print("Type the Port Number: ");
+        Scanner scanner = new Scanner(System.in);
+        portNumber = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Number of Players: ");
+        maxNrOfClients = Integer.parseInt(scanner.nextLine());
+
+        } catch (NumberFormatException e) {
             portNumber = FinalVars.DEFAULT_PORT_NR;
+            maxNrOfClients = FinalVars.MAX_NR_PLAYERS;
         }
     }
 
@@ -174,24 +180,41 @@ public class Server {
                 client.sendMessage("\n" + message);
         }
     }
-/*
-    public void stopConnection(String playerName) {
+
+//   /* public void stopConnection(String playerName) {
+
     /**
      * Stops the connection.
-     * @param client is a server connection.
-     * @param playerName
-     * If the list of players is not empty it will broadcast a message with the name of the player when he quits, removing him from the list.
-     * Otherwise it will print out then names of players still in the game.
+     *
+     * @param client     is a server connection.
+     * @param playerName If the list of players is not empty it will broadcast a message with the name of the player when he quits, removing him from the list.
+     *                   Otherwise it will print out then names of players still in the game.
      */
-/*    public void stopConnection(ClientsConnection client, String playerName) {
-
+    public void stopConnection(ClientsConnection client, String playerName) {
         if (!clientsList.isEmpty()) {
             broadcast("\n" + (char) 27 + "[30;41;1m[" + playerName + "] as quit!" + (char) 27 + "[0m");
         }
-        ;
         System.out.println(clientsList.remove(clientSocket.getInetAddress()) + "loose connection.\nRemaining players: " + clientsList.size());
     }
-*/
+
+    public void endGame(){
+        try {
+
+            clientSocket.close();
+            for (ClientsConnection client: clientsList.values()) {
+                client.getClientSocket().close();
+            }
+
+            clientsList.clear();
+
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+    }
+
+
 
     public int getNrOfMissingPlayers() {
 
