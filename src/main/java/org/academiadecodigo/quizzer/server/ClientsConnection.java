@@ -33,7 +33,19 @@ class ClientsConnection implements Runnable {
 
             out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            sendMessage("Type your name:");
+
+            sendMessage("\n\n"+
+                    "\t    ██████╗ ██╗   ██╗██╗███████╗███████╗███████╗██████╗ \n" +
+                    "\t   ██╔═══██╗██║   ██║██║╚══███╔╝╚══███╔╝██╔════╝██╔══██╗\n" +
+                    "\t   ██║   ██║██║   ██║██║  ███╔╝   ███╔╝ █████╗  ██████╔╝\n" +
+                    "\t   ██║▄▄ ██║██║   ██║██║ ███╔╝   ███╔╝  ██╔══╝  ██╔══██╗\n" +
+                    "\t   ╚██████╔╝╚██████╔╝██║███████╗███████╗███████╗██║  ██║\n" +
+                    "\t    ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝\n" +
+                "\t\t\t\t    by \n"+
+            "\tANA LOURENÇO -- HUGO NEIVA -- MARIANA FAZENDA -- TOMÁS AMARO\n\n");
+
+            Thread.sleep(3500);
+            sendMessage((char) 27 + "[30;42;1mType your name:" + (char) 27 + "[0m");
 
             message = in.readLine();
             //server.nameTyped();
@@ -54,6 +66,8 @@ class ClientsConnection implements Runnable {
             }
         } catch (IOException e) {
             e.getMessage();
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             try {
@@ -98,4 +112,5 @@ class ClientsConnection implements Runnable {
     public Socket getClientSocket() {
         return clientSocket;
     }
+
 }

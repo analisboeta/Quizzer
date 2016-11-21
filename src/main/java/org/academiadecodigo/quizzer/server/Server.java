@@ -106,7 +106,7 @@ public class Server {
             while (true) {
                 clientSocket = serverSocket.accept();
 
-                if (clientsList.size() < maxNrOfClients && !clientsList.containsKey(clientSocket.getInetAddress())) { // TODO: 18/11/16 build 2 server jars - LAN and WAN
+                if (clientsList.size() < maxNrOfClients && !clientsList.containsKey(clientSocket.getInetAddress())){ // TODO: 18/11/16 build 2 server jars - LAN and WAN
                     clientsConnection = new ClientsConnection(clientSocket, this);
                     clientsList.put(clientSocket.getInetAddress(), clientsConnection);
                     System.out.println(clientSocket + " connected!\nTotal: " + clientsList.size());
@@ -251,6 +251,25 @@ public class Server {
         broadcast(scoreBoard);
     }
 
+    public void printFinalScoreboard() {
+        String endLogo =
+                "██╗    ██╗███████╗██╗     ██╗         ██████╗  ██████╗ ███╗   ██╗███████╗\n" +
+                "██║    ██║██╔════╝██║     ██║         ██╔══██╗██╔═══██╗████╗  ██║██╔════╝\n" +
+                "██║ █╗ ██║█████╗  ██║     ██║         ██║  ██║██║   ██║██╔██╗ ██║█████╗  \n" +
+                "██║███╗██║██╔══╝  ██║     ██║         ██║  ██║██║   ██║██║╚██╗██║██╔══╝  \n" +
+                " ███╔███╔╝███████╗███████╗███████╗    ██████╔╝╚██████╔╝██║ ╚████║███████╗\n" +
+                " ╚══╝╚══╝ ╚══════╝╚══════╝╚══════╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝\n" +
+                "                                                                         \n\n\n";
+
+        String scoreBoard = "";
+        for (ClientsConnection client : clientsList.values()) {
+            scoreBoard += client.getName() + " | Score: " + client.getScore() + "\t";
+        }
+        broadcast(endLogo + scoreBoard);
+    }
+
+
+
     public boolean removeClient(InetAddress ip, Socket clientSocket) {
 
         return clientsList.remove(ip, clientSocket);
@@ -269,4 +288,5 @@ public class Server {
     public boolean isQuestionAnswerd() {
         return game.isQuestionAnswered();
     }
+
 }

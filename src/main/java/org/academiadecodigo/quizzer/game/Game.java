@@ -47,6 +47,11 @@ public class Game {
         } else {
             System.out.println("Question Answered" + questionAnswered);
             server.broadcast("\n" + (char) 27 + "[30;42;1mStart the game" + (char) 27 + "[0m");
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             server.broadcast(printQuestion());
         }
     }
@@ -74,11 +79,15 @@ public class Game {
                             System.out.println("if correct answer" + playerName);
                             server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
                             server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
+                            server.printScoreboard();
+                            Thread.sleep(3000);
 
                         } else {
                             System.out.println("else incorrect answer" + playerName);
                             server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
-                            server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+                            server.actualizeScores(playerName,0);
+                            server.printScoreboard();
+                            Thread.sleep(3000);
                         }
                     }
                 } else {
@@ -87,13 +96,11 @@ public class Game {
                 server.actualizeScores("FinalVars.TIME_RUN_OUT", (-FinalVars.POINTS_FOR_ANSWER));*/
                 }
                 if(roundsCounter == FinalVars.TOTAL_OF_QUESTIONS){
+                    server.printFinalScoreboard();
                     server.printScoreboard();
-                    //TODO END OF GAME STYLISH
                     Thread.sleep(3000);
                     server.endGame();
                 }
-                server.printScoreboard();
-                wait(1000);
                 questionAnswered = false;
                 server.broadcast(printQuestion());
 
