@@ -14,7 +14,6 @@ public class Game {
     private Server server;
     private int maxNrOfPlayers;
     private boolean questionAnswered;
-    private int aux = 0;
     private int playersConnected = 0;
     private int roundsCounter = 0;
 
@@ -42,17 +41,20 @@ public class Game {
         server.broadcast("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
                 "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");
 
+<<<<<<< HEAD
         aux++;
         if (server.getNrOfMissingPlayers() > 0 || aux < FinalVars.MAX_NR_PLAYERS) {
+=======
+   /*            ("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
+                "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");*/
+
+        playersConnected++;
+        if (server.getNrOfMissingPlayers() > 0 || playersConnected < FinalVars.MAX_NR_PLAYERS) {
+>>>>>>> a6bc9e78bb2c2cf57066237e37f7f1a25ef9ee73
             return;
         } else {
             System.out.println("Question Answered" + questionAnswered);
             server.broadcast("\n" + (char) 27 + "[30;42;1mStart the game" + (char) 27 + "[0m");
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             server.broadcast(printQuestion());
         }
     }
@@ -68,7 +70,41 @@ public class Game {
      */
     public synchronized void gameFlow(String message, String playerName) {
 
+<<<<<<< HEAD
         System.out.println("someone answered: " + questionAnswered);
+
+        try {
+            if (!message.equals(FinalVars.TIME_RUN_OUT_STRING) && !playerName.equals(FinalVars.TIME_RUN_OUT_STRING)) {
+                if (questionAnswered) {
+                    if (verifyAnswer(message)) {
+                        System.out.println("if correct answer" + playerName);
+                        server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
+                        server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
+
+                    } else {
+                        System.out.println("else incorrect answer" + playerName);
+                        server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
+                        server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+                    }
+                }
+            } else {
+                System.out.println("answer timeout" + playerName);
+
+            }
+            server.printScoreboard();
+            wait(1000);
+            questionAnswered = false;
+            server.broadcast(printQuestion());
+
+        } catch (InterruptedException e) {
+            e.getMessage();
+            e.printStackTrace();
+=======
+
+        /**
+         *  boolean timeRunOut;
+         * todo testar se esta porra do resposta dada funciona
+         */
 
             try {
                 roundsCounter++;
@@ -80,34 +116,40 @@ public class Game {
                             System.out.println("if correct answer" + playerName);
                             server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
                             server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
-                            server.printScoreboard();
-                            Thread.sleep(3000);
 
                         } else {
                             System.out.println("else incorrect answer" + playerName);
                             server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
-                            server.actualizeScores(playerName,0);
-                            server.printScoreboard();
-                            Thread.sleep(3000);
+                            server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
                         }
                     }
                 } else {
                     System.out.println("answer timeout" + playerName);
+               /* server.broadcast("Time Out!!! Correct answer: " + getCorrectAnswer());
+                server.actualizeScores("FinalVars.TIME_RUN_OUT", (-FinalVars.POINTS_FOR_ANSWER));*/
                 }
                 if(roundsCounter == FinalVars.TOTAL_OF_QUESTIONS){
-                    server.printFinalScoreboard();
+                    server.printScoreboard();
+                    //TODO END OF GAME STYLISH
                     Thread.sleep(3000);
                     server.endGame();
                 }
+                server.printScoreboard();
+                wait(1000);
                 questionAnswered = false;
                 server.broadcast(printQuestion());
 
+                /**
+                 * todo timeout não funca.
+                 * penso que terá que ver com a condição
+                 */
 
             } catch (InterruptedException e) {
                 e.getMessage();
                 e.printStackTrace();
             }
             System.out.println("alguém respondeu fim método: " + questionAnswered);
+>>>>>>> a6bc9e78bb2c2cf57066237e37f7f1a25ef9ee73
         }
 
     /**

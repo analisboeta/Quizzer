@@ -19,11 +19,7 @@ class ClientsConnection implements Runnable {
     private int score;
     private String name;
 
-    /**
-     *
-     * @param clientSocket
-     * @param server
-     */
+
     ClientsConnection(Socket clientSocket, Server server) {
         this.clientSocket = clientSocket;
         this.server = server;

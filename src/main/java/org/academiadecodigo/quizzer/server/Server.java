@@ -181,7 +181,6 @@ public class Server {
         }
     }
 
-//   /* public void stopConnection(String playerName) {
 
     /**
      * Stops the connection.
@@ -277,7 +276,7 @@ public class Server {
 
     void nameTyped() {
 
-        System.out.println("entrei no name typed");
+        System.out.println("I'm in a typed name");
         notifyAll();
     }
 
@@ -285,7 +284,7 @@ public class Server {
         game.setQuestionAnswered(questionAnswered);
     }
 
-    public boolean isQuestionAnswerd() {
+    public boolean isQuestionAnswered() {
         return game.isQuestionAnswered();
     }
 
