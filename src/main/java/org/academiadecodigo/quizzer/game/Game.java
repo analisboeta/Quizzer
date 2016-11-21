@@ -103,7 +103,6 @@ public class Game {
                 }
                 if(roundsCounter == FinalVars.TOTAL_OF_QUESTIONS){
                     server.printFinalScoreboard();
-                    server.printScoreboard();
                     Thread.sleep(3000);
                     server.endGame();
                 }
