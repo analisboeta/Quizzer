@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Created by Neiva on 10-11-2016.
+ * Created by <Code Cadets_> Ana Lourenço, Hugo Neiva, Mariana Fazenda, Tomás Amaro on 21/11/16.
  */
 class ClientsConnection implements Runnable {
 
@@ -19,6 +19,11 @@ class ClientsConnection implements Runnable {
     private int score;
     private String name;
 
+    /**
+     *
+     * @param clientSocket
+     * @param server
+     */
     ClientsConnection(Socket clientSocket, Server server) {
         this.clientSocket = clientSocket;
         this.server = server;
@@ -36,7 +41,6 @@ class ClientsConnection implements Runnable {
             sendMessage("Type your name:");
 
             message = in.readLine();
-            //server.nameTyped();
 
             String pNumber = Thread.currentThread().getName().substring(Thread.currentThread().getName().length() - 1);
             Thread.currentThread().setName("[Player " + pNumber + "] " + message);

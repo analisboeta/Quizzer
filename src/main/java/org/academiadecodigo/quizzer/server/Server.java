@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by Neiva on 10-11-2016.
+ * Created by <Code Cadets_> Ana Lourenço, Hugo Neiva, Mariana Fazenda, Tomás Amaro on 21/11/16.
  */
 public class Server {
 
@@ -28,7 +28,7 @@ public class Server {
 
     /**
      * Server constructor.
-     * Sets a port number and the final number od players.
+     * Sets a port number and the final number of players.
      * Creates a player list.
      * Calls a method to fill the list.
      * Starts the server.
@@ -61,8 +61,8 @@ public class Server {
     }
 
     /**
-     * Sets the port Number and the user input Stream.
-     * It will be set as a final variable.
+     * Sets the port number and the user input Stream.
+     * The port number will be set as a final variable.
      */
     private void setPortNumber() {
 
@@ -105,32 +105,6 @@ public class Server {
                     clientsList.put(clientSocket.getInetAddress(), clientsConnection);
                     System.out.println(clientSocket + " connected!\nTotal: " + clientsList.size());
                     pool.submit(clientsConnection);
-/*
-                    try {
-
-                        */
-/**
- * todo synchro não funciona
- * fica em wait infinito
- * estou sem ideias
- * vou lanchar
- *//*
-
-                        synchronized (this) {
-                            counter++;
-                            while (counter < maxNrOfClients) {
-                                System.out.println("counter: " + counter);
-                                wait();
-                                System.out.println("counter after wait: " + counter);
-                            }
-                        }
-
-                        //SYNCHRO ATÉ AQUI!!!!!!
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("saí do wait");
-*/
                     continue;
                 }
                 rejectClient(clientSocket);
@@ -196,8 +170,8 @@ public class Server {
     public synchronized void sendPrivateMessage(String message, String PlayerName) {
 
         for (ClientsConnection client : clientsList.values()) {
-            if(clientsList.values().equals(PlayerName))
-            client.sendMessage("\n" + message);
+            if (clientsList.values().equals(PlayerName))
+                client.sendMessage("\n" + message);
         }
     }
 /*
@@ -265,11 +239,11 @@ public class Server {
         notifyAll();
     }
 
-    public void serverSetQuestionAnswered(boolean questionAnswered){
+    public void serverSetQuestionAnswered(boolean questionAnswered) {
         game.setQuestionAnswered(questionAnswered);
     }
 
-    public boolean isQuestionAnswerd(){
+    public boolean isQuestionAnswerd() {
         return game.isQuestionAnswered();
     }
 }
