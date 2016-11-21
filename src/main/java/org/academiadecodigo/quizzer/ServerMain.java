@@ -19,7 +19,6 @@ public class ServerMain {
             tcpServer = new Server(Integer.parseInt(args[0]),Integer.parseInt(args[1]));
         }
 
-//        new Game(new Server());
 
     }
 }

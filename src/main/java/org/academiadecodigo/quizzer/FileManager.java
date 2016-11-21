@@ -10,6 +10,13 @@ import java.util.LinkedList;
  */
 public class FileManager {
 
+    /**
+     * File reader and converter
+     * @param path
+     * @returns - linked list of strings
+     * @throws IOException
+     * This method reads each line of a given file, specified by its path, and converts into a container of strings
+     */
     public static LinkedList<String> readFile(String path) throws IOException {
 
         BufferedReader bReader = new BufferedReader(new FileReader(path));

@@ -5,7 +5,7 @@ import org.academiadecodigo.quizzer.constants.QuestionBuildType;
 import org.academiadecodigo.quizzer.server.Server;
 
 /**
- * Created by codecadet on 15/11/16.
+ * Created by <Code Cadets_> Ana Lourenço, Hugo Neiva, Mariana Fazenda, Tomás Amaro on 21/11/16.
  */
 public class Game {
 
@@ -14,8 +14,10 @@ public class Game {
     private Server server;
     private int maxNrOfPlayers;
     private boolean questionAnswered;
+    private int aux = 0;
     private int playersConnected = 0;
     private int roundsCounter = 0;
+
 
     public Game(Server server, int maxNrOfPlayers) {
         this.server = server;
@@ -30,19 +32,18 @@ public class Game {
 
     /**
      * Game starter
+     *
      * @param playerName name of the player.
-     *                   If the minimum number of players are connected, the server sends a "Start game" message and prints a question to the players.
+     * If the minimum number of players are connected, the server sends a "Start game"
+     * message and prints a question to the players.
      */
     public synchronized void startGame(String playerName) {
 
         server.broadcast("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
                 "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");
 
-   /*            ("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
-                "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");*/
-
-        playersConnected++;
-        if (server.getNrOfMissingPlayers() > 0 || playersConnected < FinalVars.MAX_NR_PLAYERS) {
+        aux++;
+        if (server.getNrOfMissingPlayers() > 0 || aux < FinalVars.MAX_NR_PLAYERS) {
             return;
         } else {
             System.out.println("Question Answered" + questionAnswered);
@@ -57,12 +58,17 @@ public class Game {
     }
 
     /**
+     * Follows the game logic
      *
-     * @param message
-     * @param playerName name of the player.
+     * @param message    - the answer given by the player
+     * @param playerName - the name of the player.
+     * In the player inputs a name and an answer: this method tests if the player has made an input.
+     * If so, it will verify if the question has been answered. If answered correctly, increments the scoreboard.
+     * Otherwise, a "wrong answer" message will be printed out to the player.
      */
     public synchronized void gameFlow(String message, String playerName) {
 
+        System.out.println("someone answered: " + questionAnswered);
 
         /**
          *  boolean timeRunOut;
@@ -117,24 +123,30 @@ public class Game {
         }
 
     /**
-     * Compares the answer given by the user with the correct answer.
+     * Verifies answer
      *
-     * @param answer the input from the player
-     * @return boolean
+     * @param answer - the input from the player
+     * @return boolean - true when the answer is correct
+     * Transforms the user input to an uppercase string and then compares it with the correct answer present in the question array.
      */
-
     private boolean verifyAnswer(String answer) {
 
         return answer.toUpperCase().equals(question[FinalVars.CORRECT_ANSWER_LETTER_INDEX]);
     }
 
+    /**
+     * @return correct answer string
+     */
     private String getCorrectAnswer() {
 
         return question[FinalVars.CORRECT_ANSWER_LETTER_INDEX];
     }
 
+
     /**
      * Prints a question
+     *
+     * @return - question string
      * If there is no handler, it will instantiate one and it will load the questions
      * Uses method from the handler to pick a question.
      */
@@ -150,9 +162,10 @@ public class Game {
     }
 
     /**
-     * Builds questions. It places the question and the four options below.
+     * Builds questions
      *
-     * @return A question.
+     * @return - a complete question set
+     * It places the question and its four possible answers below
      */
     private String questionBuilder() {
 
@@ -162,13 +175,7 @@ public class Game {
                 (char) 27 + "[31;1m" + QuestionBuildType.SECONDANSWER.getText() + (char) 27 + "[0m" + question[2],
                 (char) 27 + "[31;1m" + QuestionBuildType.THIRDANSWER.getText() + (char) 27 + "[0m" + question[3],
                 (char) 27 + "[31;1m" + QuestionBuildType.FOURTHANSWER.getText() + (char) 27 + "[0m" + question[4]);
-/*
-        return (char) 27 + "[37;40;1m" + question[0] + (char) 27 + "[0m" +
-                (char) 27 + "[31;1m" + QuestionBuildType.FIRSTANSWER.getText() + (char) 27 + "[0m" + question[1] +
-                (char) 27 + "[31;1m" + QuestionBuildType.SECONDANSWER.getText() + (char) 27 + "[0m" + question[2] +
-                (char) 27 + "[31;1m" + QuestionBuildType.THIRDANSWER.getText() + (char) 27 + "[0m" + question[3] +
-                (char) 27 + "[31;1m" + QuestionBuildType.FOURTHANSWER.getText() + (char) 27 + "[0m" + question[4];
-*/
+
     }
 
     public int getMaxNrOfPlayers() {
@@ -186,6 +193,7 @@ public class Game {
     }
 
     public void setQuestionAnswered(boolean questionAnswered) {
+
         this.questionAnswered = questionAnswered;
     }
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by Neiva on 10-11-2016.
+ * Created by <Code Cadets_> Ana Lourenço, Hugo Neiva, Mariana Fazenda, Tomás Amaro on 21/11/16.
  */
 public class Server {
 
@@ -29,7 +29,7 @@ public class Server {
 
     /**
      * Server constructor.
-     * Sets a port number and the final number od players.
+     * Sets a port number and the final number of players.
      * Creates a player list.
      * Calls a method to fill the list.
      * Starts the server.
@@ -63,8 +63,8 @@ public class Server {
     }
 
     /**
-     * Sets the port Number and the user input Stream.
-     * It will be set as a final variable.
+     * Sets the port number and the user input Stream.
+     * The port number will be set as a final variable.
      */
     private void setPortNumber() {
 
