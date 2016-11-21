@@ -94,4 +94,8 @@ class ClientsConnection implements Runnable {
 
         return score;
     }
+
+    public Socket getClientSocket() {
+        return clientSocket;
+    }
 }

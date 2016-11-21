@@ -14,7 +14,8 @@ public class Game {
     private Server server;
     private int maxNrOfPlayers;
     private boolean questionAnswered;
-    private int aux = 0;
+    private int playersConnected = 0;
+    private int roundsCounter = 0;
 
     public Game(Server server, int maxNrOfPlayers) {
         this.server = server;
@@ -34,15 +35,17 @@ public class Game {
      */
     public synchronized void startGame(String playerName) {
 
+        server.broadcast("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
+                "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");
 
-   /*     server.broadcast("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
+   /*            ("\n" + (char) 27 + "[30;42;1m" + playerName + " as joined the game" + (char) 27 +
                 "[0m\nStill waiting for " + server.getNrOfMissingPlayers() + " players");*/
 
-        aux++;
-        if (server.getNrOfMissingPlayers() > 0 || aux < FinalVars.MAX_NR_PLAYERS) {
+        playersConnected++;
+        if (server.getNrOfMissingPlayers() > 0 || playersConnected < FinalVars.MAX_NR_PLAYERS) {
             return;
         } else {
-                System.out.println("Question Answered" + questionAnswered);
+            System.out.println("Question Answered" + questionAnswered);
             server.broadcast("\n" + (char) 27 + "[30;42;1mStart the game" + (char) 27 + "[0m");
             server.broadcast(printQuestion());
         }
@@ -61,51 +64,50 @@ public class Game {
          * todo testar se esta porra do resposta dada funciona
          */
 
-        System.out.println("alguém respondeu: " + questionAnswered);
+            try {
+                roundsCounter++;
+                if (!message.equals(FinalVars.TIME_RUN_OUT_STRING) && !playerName.equals(FinalVars.TIME_RUN_OUT_STRING)) {
+                    if (questionAnswered) {
+                        if (verifyAnswer(message)) {
+                            System.out.println("alguém respondeu: " + questionAnswered);
+                            //questionAnswered = true;
+                            System.out.println("if correct answer" + playerName);
+                            server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
+                            server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
 
-        try {
-            if (!message.equals(FinalVars.TIME_RUN_OUT_STRING) && !playerName.equals(FinalVars.TIME_RUN_OUT_STRING)) {
-                if (questionAnswered) {
-                    if (verifyAnswer(message)) {
-                        //questionAnswered = true;
-                        System.out.println("if correct answer" + playerName);
-                        server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
-                        server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
-
-                    } else {
-                        System.out.println("else incorrect answer" + playerName);
-                        server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
-                        server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+                        } else {
+                            System.out.println("else incorrect answer" + playerName);
+                            server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
+                            server.actualizeScores(playerName, (-FinalVars.POINTS_FOR_ANSWER));
+                        }
                     }
-                }
-            } else {
-                System.out.println("answer timeout" + playerName);
+                } else {
+                    System.out.println("answer timeout" + playerName);
                /* server.broadcast("Time Out!!! Correct answer: " + getCorrectAnswer());
                 server.actualizeScores("FinalVars.TIME_RUN_OUT", (-FinalVars.POINTS_FOR_ANSWER));*/
+                }
+                if(roundsCounter == FinalVars.TOTAL_OF_QUESTIONS){
+                    server.printScoreboard();
+                    //TODO END OF GAME STYLISH
+                    Thread.sleep(3000);
+                    server.endGame();
+                }
+                server.printScoreboard();
+                wait(1000);
+                questionAnswered = false;
+                server.broadcast(printQuestion());
+
+                /**
+                 * todo timeout não funca.
+                 * penso que terá que ver com a condição
+                 */
+
+            } catch (InterruptedException e) {
+                e.getMessage();
+                e.printStackTrace();
             }
-            server.printScoreboard();
-            wait(1000);
-            questionAnswered = false;
-            server.broadcast(printQuestion());
-
-            /**
-             * todo timeout não funca.
-             * penso que terá que ver com a condição
-             */
-/*            timeRunOut = true;
-            wait(FinalVars.TIME_TO_ANSWER);
-            notifyAll();
-            if (timeRunOut) {
-                gameFlow(FinalVars.TIME_RUN_OUT_STRING, FinalVars.TIME_RUN_OUT_STRING);
-                return;
-            }*/
-        } catch (InterruptedException e) {
-            e.getMessage();
-            e.printStackTrace();
+            System.out.println("alguém respondeu fim método: " + questionAnswered);
         }
-        System.out.println("alguém respondeu fim método: " + questionAnswered);
-
-    }
 
     /**
      * Compares the answer given by the user with the correct answer.
@@ -165,6 +167,10 @@ public class Game {
     public int getMaxNrOfPlayers() {
 
         return maxNrOfPlayers;
+    }
+
+    public void setMaxNrOfPlayers(int maxNrOfPlayers) {
+        this.maxNrOfPlayers = maxNrOfPlayers;
     }
 
     public boolean isQuestionAnswered() {

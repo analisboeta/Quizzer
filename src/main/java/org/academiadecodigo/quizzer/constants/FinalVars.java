@@ -14,5 +14,6 @@ public class FinalVars {
     public static final int POINTS_FOR_ANSWER = 1;
     public static final String TIME_RUN_OUT_STRING = "\t\t\t";
     public static final int TIME_TO_ANSWER = 20000;
+    public static final int TOTAL_OF_QUESTIONS = 5;
 
 }
