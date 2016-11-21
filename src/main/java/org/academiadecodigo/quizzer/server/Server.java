@@ -185,7 +185,7 @@ public class Server {
      *
      * @param client     is a server connection.
      * @param playerName If the list of players is not empty it will broadcast a message with the name of the player when he quits, removing him from the list.
-     *                   Otherwise it will print out then names of players still in the game.
+     *                   Otherwise it will print out the names of players still in the game.
      */
     public void stopConnection(ClientsConnection client, String playerName) {
         if (!clientsList.isEmpty()) {
@@ -261,6 +261,7 @@ public class Server {
     /**
      * Prints the scoreboard.
      * For each client in the client list, prints the score.
+     * Sends it to all players.
      */
     public void printScoreboard() {
 
@@ -296,6 +297,5 @@ public class Server {
     public void serverSetQuestionAnswered(boolean questionAnswered) {
         game.setQuestionAnswered(questionAnswered);
     }
-
 
 }
