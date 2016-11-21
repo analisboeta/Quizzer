@@ -32,7 +32,6 @@ public class Game {
 
     /**
      * Game starter
-     *
      * @param playerName name of the player.
      * If the minimum number of players are connected, the server sends a "Start game"
      * message and prints a question to the players.
@@ -68,23 +67,18 @@ public class Game {
      */
     public synchronized void gameFlow(String message, String playerName) {
 
-        System.out.println("someone answered: " + questionAnswered);
 
             try {
                 roundsCounter++;
                 if (!message.equals(FinalVars.TIME_RUN_OUT_STRING) && !playerName.equals(FinalVars.TIME_RUN_OUT_STRING)) {
                     if (questionAnswered) {
                         if (verifyAnswer(message)) {
-                            System.out.println("alguém respondeu: " + questionAnswered);
-                            //questionAnswered = true;
-                            System.out.println("if correct answer" + playerName);
                             server.broadcast(playerName + " won the round.\nCorrect answer: " + getCorrectAnswer());
                             server.actualizeScores(playerName, FinalVars.POINTS_FOR_ANSWER);
                             server.printScoreboard();
                             Thread.sleep(3000);
 
                         } else {
-                            System.out.println("else incorrect answer" + playerName);
                             server.broadcast(playerName + " has missed. \nCorrect answer: " + getCorrectAnswer());
                             server.actualizeScores(playerName,0);
                             server.printScoreboard();
@@ -107,7 +101,6 @@ public class Game {
                 e.getMessage();
                 e.printStackTrace();
             }
-            System.out.println("alguém respondeu fim método: " + questionAnswered);
         }
 
     /**
@@ -166,10 +159,6 @@ public class Game {
 
     }
 
-    public int getMaxNrOfPlayers() {
-
-        return maxNrOfPlayers;
-    }
 
     public void setMaxNrOfPlayers(int maxNrOfPlayers) {
         this.maxNrOfPlayers = maxNrOfPlayers;

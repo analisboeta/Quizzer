@@ -25,6 +25,12 @@ class ClientsConnection implements Runnable {
         this.server = server;
     }
 
+
+    /**
+     * Implementation of run method from interface Runnable.
+     * Creation of input and output streams.
+     * Set players name for the server.
+     */
     @Override
     public void run() {
 
@@ -35,15 +41,15 @@ class ClientsConnection implements Runnable {
             out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            sendMessage("\n\n"+
+            sendMessage("\n\n" +
                     "\t    ██████╗ ██╗   ██╗██╗███████╗███████╗███████╗██████╗ \n" +
                     "\t   ██╔═══██╗██║   ██║██║╚══███╔╝╚══███╔╝██╔════╝██╔══██╗\n" +
                     "\t   ██║   ██║██║   ██║██║  ███╔╝   ███╔╝ █████╗  ██████╔╝\n" +
                     "\t   ██║▄▄ ██║██║   ██║██║ ███╔╝   ███╔╝  ██╔══╝  ██╔══██╗\n" +
                     "\t   ╚██████╔╝╚██████╔╝██║███████╗███████╗███████╗██║  ██║\n" +
                     "\t    ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝\n" +
-                "\t\t\t\t    by \n"+
-            "\tANA LOURENÇO -- HUGO NEIVA -- MARIANA FAZENDA -- TOMÁS AMARO\n\n");
+                    "\t\t\t\t    by \n" +
+                    "\tANA LOURENÇO -- HUGO NEIVA -- MARIANA FAZENDA -- TOMÁS AMARO\n\n");
 
             Thread.sleep(3500);
             sendMessage((char) 27 + "[30;42;1mType your name:" + (char) 27 + "[0m");
@@ -54,15 +60,15 @@ class ClientsConnection implements Runnable {
             Thread.currentThread().setName("[Player " + pNumber + "] " + message);
             name = Thread.currentThread().getName();
 
-            if (!name.equals("")){
-            server.startGame(name);
+            if (!name.equals("")) {
+                server.startGame(name);
             }
 
             while ((message = in.readLine()) != null) {
                 server.serverSetQuestionAnswered(true);
                 System.out.println(clientSocket.getLocalAddress().getHostName() + clientSocket.getInetAddress() +
                         " | " + Thread.currentThread().getName() + ": " + message);
-                    server.receiveClientMessage(message, name);
+                server.receiveClientMessage(message, name);
             }
         } catch (IOException e) {
             e.getMessage();

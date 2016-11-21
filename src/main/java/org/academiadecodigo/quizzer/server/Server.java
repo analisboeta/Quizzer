@@ -39,7 +39,6 @@ public class Server {
         setPortNumber();
         game = new Game(this);
         game.setMaxNrOfPlayers(maxNrOfClients);
-       // maxNrOfClients = game.getMaxNrOfPlayers();
         clientsList = new Hashtable<>();
         startServer();
     }
@@ -102,7 +101,6 @@ public class Server {
 
         try {
             ServerSocket serverSocket = new ServerSocket(portNumber);
-            //int counter = 0;
             while (true) {
                 clientSocket = serverSocket.accept();
 
@@ -196,6 +194,10 @@ public class Server {
         System.out.println(clientsList.remove(clientSocket.getInetAddress()) + "loose connection.\nRemaining players: " + clientsList.size());
     }
 
+    /**
+     * Ends the game.
+     * Closes all client connections and clears the list.
+     */
     public void endGame(){
         try {
 
@@ -206,9 +208,7 @@ public class Server {
 
             clientsList.clear();
 
-
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
@@ -220,17 +220,34 @@ public class Server {
         return maxNrOfClients - clientsList.size();
     }
 
+    /**
+     * Starts the game.
+     * @param clientName - players input.
+     * Starts the game for one player.
+     */
     void startGame(String clientName) {
 
         game.startGame(clientName);
     }
 
+    /**
+     * Receives a message.
+     * @param message - input by the player.
+     * @param playerName - players name.
+     * Checks to see if the player answered. If so, continue the game flow.
+     */
     synchronized void receiveClientMessage(String message, String playerName) {
         if (game.isQuestionAnswered()) {
             game.gameFlow(message, playerName);
         }
     }
 
+    /**
+     * Sets the score.
+     * @param playerName - name of the player.
+     * @param points - points set for each question.
+     * For each player in the list, actualizes the score.
+     */
     public void actualizeScores(String playerName, int points) {
 
         for (ClientsConnection client : clientsList.values()) {
@@ -241,6 +258,10 @@ public class Server {
         }
     }
 
+    /**
+     * Prints the scoreboard.
+     * For each client in the client list, prints the score.
+     */
     public void printScoreboard() {
 
         String scoreBoard = "";
@@ -250,6 +271,11 @@ public class Server {
         broadcast(scoreBoard);
     }
 
+    /**
+     * Prints final scoreboard.
+     * Prints every name in the clients list as well as the score for each one.
+     * Sends the end logo and scoreboard for every player.
+     */
     public void printFinalScoreboard() {
         String endLogo =
                 "██╗    ██╗███████╗██╗     ██╗         ██████╗  ██████╗ ███╗   ██╗███████╗\n" +
@@ -267,25 +293,9 @@ public class Server {
         broadcast(endLogo + scoreBoard);
     }
 
-
-
-    public boolean removeClient(InetAddress ip, Socket clientSocket) {
-
-        return clientsList.remove(ip, clientSocket);
-    }
-
-    void nameTyped() {
-
-        System.out.println("I'm in a typed name");
-        notifyAll();
-    }
-
     public void serverSetQuestionAnswered(boolean questionAnswered) {
         game.setQuestionAnswered(questionAnswered);
     }
 
-    public boolean isQuestionAnswered() {
-        return game.isQuestionAnswered();
-    }
 
 }

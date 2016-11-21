@@ -17,9 +17,9 @@ public class QuestionHandler {
 
     /**
      * Loads Questions
-     *
      * If the questions are null, the file manager will select a theme. If not, it will return a question.
-     * */
+     * (To implement...)
+     **/
     public void loadQuestions() {
 
         // Even though our initial batch of questions is General Knowledge,
