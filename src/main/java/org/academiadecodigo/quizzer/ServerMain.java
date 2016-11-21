@@ -10,7 +10,6 @@ public class ServerMain {
 
     public static void main(String[] args) {
 
-
         Server tcpServer = null;
 
         if (args.length < 1) {

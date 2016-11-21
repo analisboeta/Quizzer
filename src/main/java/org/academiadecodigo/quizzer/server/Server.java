@@ -261,6 +261,7 @@ public class Server {
     /**
      * Prints the scoreboard.
      * For each client in the client list, prints the score.
+     * Sends it to all players.
      */
     public void printScoreboard() {
 
@@ -296,6 +297,5 @@ public class Server {
     public void serverSetQuestionAnswered(boolean questionAnswered) {
         game.setQuestionAnswered(questionAnswered);
     }
-
 
 }
